@@ -18,6 +18,12 @@ export const weddingConfigs = sqliteTable("wedding_configs", {
   address: text("address").notNull().default(""),
   mapUrl: text("map_url").notNull().default(""),
   musicUrl: text("music_url").notNull().default(""),
+  coverImageUrl: text("cover_image_url").notNull().default(""),
+  familiesImageUrl: text("families_image_url").notNull().default(""),
+  familiesGroomImageUrl: text("families_groom_image_url").notNull().default(""),
+  familiesBrideImageUrl: text("families_bride_image_url").notNull().default(""),
+  storyImageUrl: text("story_image_url").notNull().default(""),
+  timelineImageUrl: text("timeline_image_url").notNull().default(""),
   eventDate: text("event_date").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

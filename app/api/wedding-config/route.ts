@@ -9,7 +9,7 @@ export async function GET() {
     for (const row of rows) {
       const side = row.family as GuestSide;
       if (side in GUEST_SIDES) {
-        configs[side] = withEventDate({ ...GUEST_SIDES[side], venueName: row.venueName, address: row.address, mapUrl: row.mapUrl, musicUrl: row.musicUrl }, row.eventDate);
+        configs[side] = withEventDate({ ...GUEST_SIDES[side], venueName: row.venueName, address: row.address, mapUrl: row.mapUrl, musicUrl: row.musicUrl, coverImageUrl: row.coverImageUrl, familiesGroomImageUrl: row.familiesGroomImageUrl, familiesBrideImageUrl: row.familiesBrideImageUrl, storyImageUrl: row.storyImageUrl, timelineImageUrl: row.timelineImageUrl }, row.eventDate);
       }
     }
     return Response.json({ configs }, { headers: { "Cache-Control": "no-store" } });

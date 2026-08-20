@@ -1,8 +1,11 @@
 import { memo } from "react";
 import Image from "next/image";
-import { PHOTO_URLS } from "./constants";
+import { useFamilyContext } from "@/app/context/FamilyContext";
 
 export const FamiliesSection = memo(function FamiliesSection() {
+  const { guestContext } = useFamilyContext();
+  const groomImageUrl = guestContext?.familiesGroomImageUrl;
+  const brideImageUrl = guestContext?.familiesBrideImageUrl;
   return (
     <section className="families-section paper-section">
       <div className="section-heading scroll-reveal">
@@ -12,14 +15,14 @@ export const FamiliesSection = memo(function FamiliesSection() {
       </div>
       <div className="portrait-stack scroll-reveal">
         <article className="portrait-card">
-          <Image
-            src={PHOTO_URLS[8]}
+          {groomImageUrl && <Image
+            src={groomImageUrl}
             alt="Chú rể Nguyễn Thành Nam"
             width={800}
             height={1000}
             loading="lazy"
             unoptimized
-          />
+          />}
           <div>
             <span>Chú rể</span>
             <h3>Nguyễn Thành Nam</h3>
@@ -28,14 +31,14 @@ export const FamiliesSection = memo(function FamiliesSection() {
         <article className="portrait-card offset" style={{
           margin: 0
         }}>
-          <Image
-            src={PHOTO_URLS[7]}
+          {brideImageUrl && <Image
+            src={brideImageUrl}
             alt="Cô dâu Ngô Tuyết Mai"
             width={800}
             height={1000}
             loading="lazy"
             unoptimized
-          />
+          />}
           <div>
             <span>Cô dâu</span>
             <h3>Ngô Tuyết Mai</h3>

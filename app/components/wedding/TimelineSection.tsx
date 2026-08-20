@@ -1,19 +1,21 @@
 import { memo } from "react";
 import Image from "next/image";
-import { PHOTO_URLS } from "./constants";
+import { useFamilyContext } from "@/app/context/FamilyContext";
 
 export const TimelineSection = memo(function TimelineSection() {
+  const { guestContext } = useFamilyContext();
+  const imageUrl = guestContext?.timelineImageUrl;
   return (
     <section className="timeline-section">
-      <Image
+      {imageUrl && <Image
         className="timeline-photo"
-        src={PHOTO_URLS[4]}
+        src={imageUrl}
         alt="Ảnh cưới Nam và Mai"
         width={920}
         height={1040}
         loading="lazy"
         unoptimized
-      />
+      />}
       <div className="timeline-content scroll-reveal">
         <p className="micro-title light">Wedding timeline</p>
         <h2>Timeline</h2>

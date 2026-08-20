@@ -1,22 +1,11 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import Image from "next/image";
-import { PHOTO_URLS } from "./constants";
 import { Botanical } from "./Botanical";
 import { useFamilyContext } from "@/app/context/FamilyContext";
 
 export const StorySection = memo(function StorySection() {
-  const { guestSide } = useFamilyContext();
-
-  const imageUrl = useMemo(() => {
-    switch (guestSide) {
-      case "bride":
-        return PHOTO_URLS[20];
-      case "groom":
-        return PHOTO_URLS[3];
-      default:
-        return PHOTO_URLS[3];
-    }
-  }, [guestSide]);
+  const { guestContext } = useFamilyContext();
+  const imageUrl = guestContext?.storyImageUrl;
   return (
     <section className="story-section">
       <Botanical className="story-leaf" />
@@ -28,14 +17,14 @@ export const StorySection = memo(function StorySection() {
           <i>chúng mình</i>
         </h2>
         <div className="story-photo">
-          <Image
+          {imageUrl && <Image
             src={imageUrl}
             alt="Khoảnh khắc của Nam và Mai"
             width={800}
             height={1000}
             loading="lazy"
             unoptimized
-          />
+          />}
           <span>Nam &amp; Mai</span>
         </div>
         <p>

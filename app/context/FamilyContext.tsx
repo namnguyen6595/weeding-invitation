@@ -7,6 +7,7 @@ type FamilyContextValue = {
   guestSide: GuestSide | null;
   setGuestSide: (side: GuestSide | null) => void;
   guestContext: GuestSideConfig | null;
+  sideConfigs: Partial<Record<GuestSide, GuestSideConfig>>;
   musicUrls: Partial<Record<GuestSide, string>>;
   isConfigLoading: boolean;
 };
@@ -40,7 +41,7 @@ export function FamilyContextProvider({ children }: { children: ReactNode }) {
   }, []);
   const guestContext = guestSide ? configs[guestSide] ?? null : null;
   const musicUrls = useMemo(() => Object.fromEntries(Object.entries(configs).map(([side, config]) => [side, config?.musicUrl ?? ""])) as Partial<Record<GuestSide, string>>, [configs]);
-  const value = useMemo(() => ({ guestSide, setGuestSide, guestContext, musicUrls, isConfigLoading }), [guestSide, guestContext, musicUrls, isConfigLoading]);
+  const value = useMemo(() => ({ guestSide, setGuestSide, guestContext, sideConfigs: configs, musicUrls, isConfigLoading }), [guestSide, guestContext, configs, musicUrls, isConfigLoading]);
 
   return <FamilyContext.Provider value={value}>{children}</FamilyContext.Provider>;
 }
