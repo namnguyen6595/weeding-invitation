@@ -10,7 +10,7 @@ export const StorySection = memo(function StorySection() {
   const imageUrl = useMemo(() => {
     switch (guestSide) {
       case "bride":
-        return PHOTO_URLS[21];
+        return PHOTO_URLS[20];
       case "groom":
         return PHOTO_URLS[3];
       default:
