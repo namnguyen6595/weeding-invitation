@@ -2,6 +2,8 @@ import { getDb } from "@/db";
 import { weddingConfigs } from "@/db/schema";
 import { GUEST_SIDES, withEventDate, type GuestSide } from "@/app/components/wedding/constants";
 
+const CONFIG_CACHE_CONTROL = "public, max-age=60, s-maxage=300, stale-while-revalidate=86400";
+
 export async function GET() {
   try {
     const rows = await getDb().select().from(weddingConfigs);
@@ -12,7 +14,7 @@ export async function GET() {
         configs[side] = withEventDate({ ...GUEST_SIDES[side], venueName: row.venueName, address: row.address, mapUrl: row.mapUrl, musicUrl: row.musicUrl, coverImageUrl: row.coverImageUrl, familiesGroomImageUrl: row.familiesGroomImageUrl, familiesBrideImageUrl: row.familiesBrideImageUrl, storyImageUrl: row.storyImageUrl, timelineImageUrl: row.timelineImageUrl }, row.eventDate);
       }
     }
-    return Response.json({ configs }, { headers: { "Cache-Control": "no-store" } });
+    return Response.json({ configs }, { headers: { "Cache-Control": CONFIG_CACHE_CONTROL } });
   } catch {
     return Response.json({ error: "Unable to load wedding config" }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }

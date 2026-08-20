@@ -37,6 +37,22 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    const isWeddingConfigRequest = url.pathname === "/api/wedding-config" && request.method === "GET";
+    const isAdminConfigUpdate = url.pathname === "/api/admin/config" && request.method === "PUT";
+
+    if (isWeddingConfigRequest) {
+      const edgeCache = (caches as CacheStorage & { default: Cache }).default;
+      const cacheKey = new Request(new URL("/api/wedding-config", url.origin), { method: "GET" });
+      const cachedResponse = await edgeCache.match(cacheKey);
+      if (cachedResponse) return cachedResponse;
+
+      const response = await handler.fetch(request, env, ctx);
+      if (response.ok && response.headers.get("Content-Type")?.includes("application/json")) {
+        ctx.waitUntil(edgeCache.put(cacheKey, response.clone()));
+      }
+      return response;
+    }
+
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
@@ -48,7 +64,13 @@ const worker = {
       }, allowedWidths);
     }
 
-    return handler.fetch(request, env, ctx);
+    const response = await handler.fetch(request, env, ctx);
+    if (isAdminConfigUpdate && response.ok) {
+      const edgeCache = (caches as CacheStorage & { default: Cache }).default;
+      const cacheKey = new Request(new URL("/api/wedding-config", url.origin), { method: "GET" });
+      ctx.waitUntil(edgeCache.delete(cacheKey));
+    }
+    return response;
   },
 };
 

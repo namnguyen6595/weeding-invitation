@@ -20,7 +20,7 @@ export function FamilyContextProvider({ children }: { children: ReactNode }) {
   const [isConfigLoading, setIsConfigLoading] = useState(true);
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/wedding-config", { cache: "no-store" })
+    fetch("/api/wedding-config")
       .then((response) => {
         if (!response.ok) throw new Error("Unable to load wedding config");
         return response.json();
