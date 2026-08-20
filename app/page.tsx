@@ -32,14 +32,14 @@ const WEDDING_DATE = new Date("2026-09-20T11:00:00+07:00");
 const WEDDING_DATE_END = new Date("2026-09-20T14:00:00+07:00");
 const VENUE_NAME = "Tràng An Palace";
 const VENUE_ADDRESS = "Số 1 Ngụy Như Kon Tum";
-// "Golden Hour" — JVKE. Played through the YouTube IFrame Player API (not a
-// plain <iframe src="...autoplay=1">) because mobile browsers only allow
-// media playback to start from a genuine user-activation event — a discrete
+// Played through the YouTube IFrame Player API (not a plain
+// <iframe src="...autoplay=1">) because mobile browsers only allow media
+// playback to start from a genuine user-activation event — a discrete
 // tap/click/keydown — and only when play() is called synchronously inside
 // that event handler. Passive gestures like scroll/wheel/touchmove do NOT
 // count as activation on iOS Safari or Chrome for Android, which is why the
 // previous "play on first scroll" approach silently failed on mobile.
-const MUSIC_VIDEO_ID = "PEM0Vs8jf1w";
+const MUSIC_VIDEO_ID = "hSxQln8dIQQ";
 const PHOTO_URLS = Array.from(
   { length: 36 },
   (_, index) => `https://pub-f56b79df70fa43399d2d0de06b99b7bf.r2.dev/anh-cuoi/photo-${String(index + 1).padStart(3, "0")}.webp`,
