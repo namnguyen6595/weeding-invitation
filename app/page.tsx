@@ -33,14 +33,14 @@ const WEDDING_DATE = new Date("2026-09-20T11:00:00+07:00");
 const WEDDING_DATE_END = new Date("2026-09-20T14:00:00+07:00");
 const VENUE_NAME = "Tràng An Palace";
 const VENUE_ADDRESS = "Số 1 Ngụy Như Kon Tum";
-// "Golden Hour" — JVKE. Played through the YouTube IFrame Player API (not a
-// plain <iframe src="...autoplay=1">) because mobile browsers only allow
-// media playback to start from a genuine user-activation event — a discrete
+// Played through the YouTube IFrame Player API (not a plain
+// <iframe src="...autoplay=1">) because mobile browsers only allow media
+// playback to start from a genuine user-activation event — a discrete
 // tap/click/keydown — and only when play() is called synchronously inside
 // that event handler. Passive gestures like scroll/wheel/touchmove do NOT
 // count as activation on iOS Safari or Chrome for Android, which is why the
 // previous "play on first scroll" approach silently failed on mobile.
-const MUSIC_VIDEO_ID = "PEM0Vs8jf1w";
+const MUSIC_VIDEO_ID = "hSxQln8dIQQ";
 const PHOTO_URLS = Array.from(
   { length: 36 },
   (_, index) => `https://pub-f56b79df70fa43399d2d0de06b99b7bf.r2.dev/anh-cuoi/photo-${String(index + 1).padStart(3, "0")}.webp`,
@@ -103,6 +103,7 @@ const Botanical = ({ className = "" }: { className?: string }) => (
 
 export default function Home() {
   const [musicOn, setMusicOn] = useState(false);
+  const [showMusicHint, setShowMusicHint] = useState(true);
   const [showRsvp, setShowRsvp] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [rsvpSubmitting, setRsvpSubmitting] = useState(false);
@@ -121,6 +122,17 @@ export default function Home() {
       window.cancelAnimationFrame(firstFrame);
       window.clearInterval(timer);
     };
+  }, []);
+
+  // iOS/Android browsers only allow media playback to start from a discrete
+  // tap (touchend that is NOT part of a scroll/pan, or a click) — a visitor
+  // who only scrolls, without ever tapping something, will never trigger
+  // autoplay, by design of the platform's autoplay policy. Pulse the music
+  // button for a few seconds on load so visitors notice there's a tap-to-play
+  // control, since scrolling alone can't reliably start audio on mobile.
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setShowMusicHint(false), 6000);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -274,6 +286,7 @@ export default function Home() {
     // This runs inside the button's onClick, which is itself a valid
     // user-activation gesture, so playVideo() here is safe on mobile too.
     setMusicOn(true);
+    setShowMusicHint(false);
     if (playerReadyRef.current && playerRef.current) {
       playerRef.current.playVideo();
     } else {
@@ -316,7 +329,7 @@ export default function Home() {
     <main className="invitation-canvas">
       <div className="music-frame" aria-hidden="true"><div id="music-player" /></div>
 
-      <button className={`music-control ${musicOn ? "is-playing" : ""}`} type="button" onClick={toggleMusic} aria-label={musicOn ? "Tắt nhạc" : "Bật nhạc"}>
+      <button className={`music-control ${musicOn ? "is-playing" : ""} ${showMusicHint && !musicOn ? "hint-pulse" : ""}`} type="button" onClick={toggleMusic} aria-label={musicOn ? "Tắt nhạc" : "Bật nhạc"}>
         <span className="music-bars" aria-hidden="true"><i /><i /><i /></span>
         <span>{musicOn ? "Music on" : "Music off"}</span>
       </button>
