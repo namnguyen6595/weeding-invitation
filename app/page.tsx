@@ -31,7 +31,7 @@ import { PhotoLightbox } from "./components/wedding/PhotoLightbox";
 import { RsvpModal } from "./components/wedding/RsvpModal";
 
 export default function Home() {
-  const { guestSide, setGuestSide, guestContext, musicUrl, isConfigLoading } = useFamilyContext();
+  const { guestSide, setGuestSide, guestContext, musicUrls, isConfigLoading } = useFamilyContext();
   const [musicOn, setMusicOn] = useState(false);
   const [showMusicHint, setShowMusicHint] = useState(true);
   const [showRsvp, setShowRsvp] = useState(false);
@@ -46,7 +46,7 @@ export default function Home() {
     seconds: 0,
   });
   const galleryRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRefs = useRef<Partial<Record<GuestSide, HTMLAudioElement>>>({});
 
   useEffect(() => {
     const firstFrame = window.requestAnimationFrame(() =>
@@ -134,7 +134,7 @@ export default function Home() {
   }, []);
 
   const toggleMusic = async () => {
-    const audio = audioRef.current;
+    const audio = guestSide ? audioRefs.current[guestSide] : undefined;
     if (!audio) return;
     if (!audio.paused) {
       audio.pause();
@@ -150,10 +150,16 @@ export default function Home() {
 
   const selectGuestSide = (side: GuestSide) => {
     setGuestSide(side);
-    if (audioRef.current?.paused) {
+    const audio = audioRefs.current[side];
+    if (audio?.paused) {
       setShowMusicHint(false);
-      void audioRef.current.play().catch(() => setMusicOn(false));
+      void audio.play().catch(() => setMusicOn(false));
     }
+  };
+
+  const changeGuestSide = () => {
+    if (guestSide) audioRefs.current[guestSide]?.pause();
+    setGuestSide(null);
   };
 
   const submitRsvp = async (event: FormEvent<HTMLFormElement>) => {
@@ -202,12 +208,12 @@ export default function Home() {
   return (
     <main className="invitation-canvas">
       <div className="music-frame" aria-hidden="true">
-        {musicUrl && <audio ref={audioRef} src={musicUrl} loop preload="metadata" onPlay={() => setMusicOn(true)} onPause={() => setMusicOn(false)} />}
+        {(["groom", "bride"] as GuestSide[]).map((side) => musicUrls[side] && <audio key={side} ref={(audio) => { audioRefs.current[side] = audio ?? undefined; }} src={musicUrls[side]} loop preload="metadata" onPlay={() => setMusicOn(true)} onPause={() => setMusicOn(false)} />)}
       </div>
 
       {guestSide === null && <GuestSideOverlay onSelect={selectGuestSide} disabled={isConfigLoading} />}
 
-      {musicUrl && <MusicControl
+      {guestSide && musicUrls[guestSide] && <MusicControl
         musicOn={musicOn}
         showHint={showMusicHint}
         onToggle={toggleMusic}
@@ -236,7 +242,7 @@ export default function Home() {
       {guestContext && (
         <GuestSideSwitcher
           label={guestContext.label}
-          onChange={() => setGuestSide(null)}
+          onChange={changeGuestSide}
         />
       )}
       {showRsvp && (

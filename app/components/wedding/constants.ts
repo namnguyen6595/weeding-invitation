@@ -35,6 +35,7 @@ export type GuestSideConfig = {
   venueName: string;
   address: string;
   mapUrl: string;
+  musicUrl: string;
   date: GuestSideDate;
 };
 
@@ -66,6 +67,7 @@ export const GUEST_SIDES = {
     venueName: "Tràng An Palace",
     address: "Số 1 Ngụy Như Kon Tum, Thanh Xuân, Hà Nội",
     mapUrl: "https://maps.app.goo.gl/JVmSvqrLpJtKxhTq9",
+    musicUrl: "",
     date: {
       iso: "2026-09-20T11:00:00+07:00",
       display: "11:00 · 20 · 09 · 2026",
@@ -83,6 +85,7 @@ export const GUEST_SIDES = {
     venueName: "",
     address: "Số nhà 1, Ngách 3 ,Ngõ 6, Bất Bạt, Hà Nội",
     mapUrl: "https://maps.app.goo.gl/kkA1NH6pYd4HkiN98",
+    musicUrl: "",
     date: {
       iso: "2026-09-19T15:00:00+07:00",
       display: "15:00 · 19 · 09 · 2026",

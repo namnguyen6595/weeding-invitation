@@ -17,6 +17,7 @@ export const weddingConfigs = sqliteTable("wedding_configs", {
   venueName: text("venue_name").notNull().default(""),
   address: text("address").notNull().default(""),
   mapUrl: text("map_url").notNull().default(""),
+  musicUrl: text("music_url").notNull().default(""),
   eventDate: text("event_date").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
