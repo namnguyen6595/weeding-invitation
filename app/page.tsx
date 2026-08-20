@@ -2,7 +2,6 @@
 
 import {
   FormEvent,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -45,8 +44,7 @@ export default function Home() {
     minutes: 0,
     seconds: 0,
   });
-  const galleryRef = useRef<HTMLDivElement>(null);
-  const audioRefs = useRef<Partial<Record<GuestSide, HTMLAudioElement>>>({});
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const firstFrame = window.requestAnimationFrame(() =>
@@ -122,19 +120,33 @@ export default function Home() {
     [timeLeft],
   );
 
-  const scrollGallery = useCallback((direction: -1 | 1) => {
-    const container = galleryRef.current;
-    const item = container?.querySelector<HTMLElement>(".album-slide");
-    if (!container || !item) return;
-    const gap = Number.parseFloat(window.getComputedStyle(container).gap) || 0;
-    container.scrollBy({
-      left: direction * (item.offsetWidth + gap),
-      behavior: "smooth",
-    });
-  }, []);
+  const disposeAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    audioRef.current = null;
+  };
+
+  useEffect(() => () => disposeAudio(), []);
+
+  const createAudio = (side: GuestSide) => {
+    const musicUrl = musicUrls[side];
+    if (!musicUrl) return null;
+    disposeAudio();
+    const audio = new Audio();
+    audio.loop = true;
+    audio.preload = "metadata";
+    audio.src = musicUrl;
+    audio.onplay = () => setMusicOn(true);
+    audio.onpause = () => setMusicOn(false);
+    audioRef.current = audio;
+    return audio;
+  };
 
   const toggleMusic = async () => {
-    const audio = guestSide ? audioRefs.current[guestSide] : undefined;
+    const audio = audioRef.current;
     if (!audio) return;
     if (!audio.paused) {
       audio.pause();
@@ -150,15 +162,13 @@ export default function Home() {
 
   const selectGuestSide = (side: GuestSide) => {
     setGuestSide(side);
-    const audio = audioRefs.current[side];
-    if (audio?.paused) {
-      setShowMusicHint(false);
-      void audio.play().catch(() => setMusicOn(false));
-    }
+    setShowMusicHint(false);
+    const audio = createAudio(side);
+    if (audio) void audio.play().catch(() => setMusicOn(false));
   };
 
   const changeGuestSide = () => {
-    if (guestSide) audioRefs.current[guestSide]?.pause();
+    disposeAudio();
     setGuestSide(null);
   };
 
@@ -207,10 +217,6 @@ export default function Home() {
 
   return (
     <main className="invitation-canvas">
-      <div className="music-frame" aria-hidden="true">
-        {(["groom", "bride"] as GuestSide[]).map((side) => musicUrls[side] && <audio key={side} ref={(audio) => { audioRefs.current[side] = audio ?? undefined; }} src={musicUrls[side]} loop preload="metadata" onPlay={() => setMusicOn(true)} onPause={() => setMusicOn(false)} />)}
-      </div>
-
       {guestSide === null && <GuestSideOverlay onSelect={selectGuestSide} disabled={isConfigLoading} />}
 
       {guestSide && musicUrls[guestSide] && <MusicControl
@@ -225,11 +231,7 @@ export default function Home() {
       <StorySection />
       <CeremonySection />
       <TimelineSection />
-      <AlbumSection
-        galleryRef={galleryRef}
-        scrollGallery={scrollGallery}
-        setSelectedPhoto={setSelectedPhoto}
-      />
+      <AlbumSection setSelectedPhoto={setSelectedPhoto} />
       <CountdownSection
         countdown={countdown}
         onRsvp={() => {

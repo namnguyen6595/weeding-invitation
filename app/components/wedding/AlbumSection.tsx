@@ -1,24 +1,26 @@
-import {
-  memo,
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
-} from "react";
-import Image from "next/image";
+"use client";
+
+import { memo, useCallback, useRef, type Dispatch, type SetStateAction } from "react";
 import { PHOTO_URLS } from "./constants";
 import { Botanical } from "./Botanical";
+import { DeferredAlbumImage } from "./DeferredAlbumImage";
 
 type AlbumSectionProps = {
-  galleryRef: RefObject<HTMLDivElement | null>;
-  scrollGallery: (direction: -1 | 1) => void;
   setSelectedPhoto: Dispatch<SetStateAction<number | null>>;
 };
 
 export const AlbumSection = memo(function AlbumSection({
-  galleryRef,
-  scrollGallery,
   setSelectedPhoto,
 }: AlbumSectionProps) {
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const scrollGallery = useCallback((direction: -1 | 1) => {
+    const container = galleryRef.current;
+    const item = container?.querySelector<HTMLElement>(".album-slide");
+    if (!container || !item) return;
+    const gap = Number.parseFloat(window.getComputedStyle(container).gap) || 0;
+    container.scrollBy({ left: direction * (item.offsetWidth + gap), behavior: "smooth" });
+  }, []);
+
   return (
     <section className="album-section paper-section" id="gallery">
       <Botanical className="album-leaf" />
@@ -64,13 +66,10 @@ export const AlbumSection = memo(function AlbumSection({
             onClick={() => setSelectedPhoto(index)}
             aria-label={`Xem ảnh cưới ${index + 1}`}
           >
-            <Image
+            <DeferredAlbumImage
               src={src}
               alt={`Ảnh cưới Nam và Mai - ${index + 1}`}
-              width={900}
-              height={1200}
-              loading="lazy"
-              unoptimized
+              galleryRef={galleryRef}
             />{" "}
             <span className="numeric">
               {String(index + 1).padStart(2, "0")}
