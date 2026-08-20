@@ -13,6 +13,8 @@ interface Fetcher {
 
 interface Env {
   ASSETS: Fetcher;
+  CLOUDFLARE_CACHE_PURGE_TOKEN?: string;
+  CLOUDFLARE_ZONE_ID?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -20,6 +22,28 @@ interface Env {
       };
     };
   };
+}
+
+const WEDDING_CONFIG_CACHE_TAG = "wedding-config";
+
+async function purgeWeddingConfigCache(env: Env) {
+  if (!env.CLOUDFLARE_CACHE_PURGE_TOKEN || !env.CLOUDFLARE_ZONE_ID) {
+    console.error(JSON.stringify({ event: "wedding_config_cache_purge_skipped", reason: "missing_cache_purge_credentials" }));
+    return;
+  }
+
+  const response = await fetch(`https://api.cloudflare.com/client/v4/zones/${env.CLOUDFLARE_ZONE_ID}/purge_cache`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.CLOUDFLARE_CACHE_PURGE_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ tags: [WEDDING_CONFIG_CACHE_TAG] }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Cloudflare cache purge failed with status ${response.status}`);
+  }
 }
 
 interface ExecutionContext {
@@ -73,7 +97,12 @@ const worker = {
     if (isAdminConfigUpdate && response.ok) {
       const edgeCache = (caches as CacheStorage & { default: Cache }).default;
       const cacheKey = new Request(new URL("/api/wedding-config", url.origin), { method: "GET" });
-      ctx.waitUntil(edgeCache.delete(cacheKey));
+      ctx.waitUntil(edgeCache.delete(cacheKey).catch((error) => {
+        console.error(JSON.stringify({ event: "wedding_config_local_cache_delete_failed", error: String(error) }));
+      }));
+      ctx.waitUntil(purgeWeddingConfigCache(env).catch((error) => {
+        console.error(JSON.stringify({ event: "wedding_config_global_cache_purge_failed", error: String(error) }));
+      }));
     }
     return response;
   },
