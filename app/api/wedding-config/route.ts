@@ -2,7 +2,7 @@ import { getDb } from "@/db";
 import { weddingConfigs } from "@/db/schema";
 import { GUEST_SIDES, withEventDate, type GuestSide } from "@/app/components/wedding/constants";
 
-const CONFIG_CACHE_CONTROL = "public, max-age=0, s-maxage=30, stale-while-revalidate=30";
+const CONFIG_CACHE_CONTROL = "no-store";
 const CONFIG_CACHE_TAG = "wedding-config";
 
 export async function GET() {
