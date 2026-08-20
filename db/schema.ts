@@ -10,3 +10,13 @@ export const rsvps = sqliteTable("rsvps", {
   message: text("message").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const weddingConfigs = sqliteTable("wedding_configs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  family: text("family", { enum: ["groom", "bride"] }).notNull().unique(),
+  venueName: text("venue_name").notNull().default(""),
+  address: text("address").notNull().default(""),
+  mapUrl: text("map_url").notNull().default(""),
+  eventDate: text("event_date").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

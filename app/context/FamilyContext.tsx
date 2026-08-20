@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { GUEST_SIDES, type GuestSide, type GuestSideConfig } from "@/app/components/wedding/constants";
 
 type FamilyContextValue = {
@@ -13,7 +13,15 @@ const FamilyContext = createContext<FamilyContextValue | undefined>(undefined);
 
 export function FamilyContextProvider({ children }: { children: ReactNode }) {
   const [guestSide, setGuestSide] = useState<GuestSide | null>(null);
-  const guestContext = guestSide ? GUEST_SIDES[guestSide] : null;
+  const [configs, setConfigs] = useState<Record<GuestSide, GuestSideConfig>>(GUEST_SIDES);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/wedding-config", { cache: "no-store" }).then((response) => response.json()).then((payload: { configs?: Record<GuestSide, GuestSideConfig> }) => {
+      if (!cancelled && payload.configs) setConfigs(payload.configs);
+    }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+  const guestContext = guestSide ? configs[guestSide] : null;
   const value = useMemo(() => ({ guestSide, setGuestSide, guestContext }), [guestSide, guestContext]);
 
   return <FamilyContext.Provider value={value}>{children}</FamilyContext.Provider>;

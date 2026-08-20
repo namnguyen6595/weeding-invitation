@@ -37,6 +37,26 @@ export type GuestSideConfig = {
   date: GuestSideDate;
 };
 
+export function withEventDate(config: GuestSideConfig, iso: string): GuestSideConfig {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(new Date(iso)).reduce<Record<string, string>>((result, part) => {
+    result[part.type] = part.value;
+    return result;
+  }, {});
+  const day = Number(parts.day);
+  const month = Number(parts.month);
+  const year = Number(parts.year);
+  const time = `${parts.hour}:${parts.minute}`;
+  return { ...config, date: { ...config.date, iso, display: `${time} · ${String(day).padStart(2, "0")} · ${String(month).padStart(2, "0")} · ${year}`, time, day, month: `Tháng ${String(month).padStart(2, "0")}`, year } };
+}
+
 export const GUEST_SIDES = {
   groom: {
     label: "Khách nhà trai",
