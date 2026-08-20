@@ -102,6 +102,7 @@ const Botanical = ({ className = "" }: { className?: string }) => (
 
 export default function Home() {
   const [musicOn, setMusicOn] = useState(false);
+  const [showMusicHint, setShowMusicHint] = useState(true);
   const [showRsvp, setShowRsvp] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [rsvpSubmitting, setRsvpSubmitting] = useState(false);
@@ -120,6 +121,17 @@ export default function Home() {
       window.cancelAnimationFrame(firstFrame);
       window.clearInterval(timer);
     };
+  }, []);
+
+  // iOS/Android browsers only allow media playback to start from a discrete
+  // tap (touchend that is NOT part of a scroll/pan, or a click) — a visitor
+  // who only scrolls, without ever tapping something, will never trigger
+  // autoplay, by design of the platform's autoplay policy. Pulse the music
+  // button for a few seconds on load so visitors notice there's a tap-to-play
+  // control, since scrolling alone can't reliably start audio on mobile.
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setShowMusicHint(false), 6000);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -198,6 +210,7 @@ export default function Home() {
       if (started) return;
       started = true;
       setMusicOn(true);
+      setShowMusicHint(false);
       if (playerReadyRef.current && playerRef.current) {
         playerRef.current.playVideo();
       } else {
@@ -259,6 +272,7 @@ export default function Home() {
     // This runs inside the button's onClick, which is itself a valid
     // user-activation gesture, so playVideo() here is safe on mobile too.
     setMusicOn(true);
+    setShowMusicHint(false);
     if (playerReadyRef.current && playerRef.current) {
       playerRef.current.playVideo();
     } else {
@@ -301,7 +315,7 @@ export default function Home() {
     <main className="invitation-canvas">
       <div className="music-frame" aria-hidden="true"><div id="music-player" /></div>
 
-      <button className={`music-control ${musicOn ? "is-playing" : ""}`} type="button" onClick={toggleMusic} aria-label={musicOn ? "Tắt nhạc" : "Bật nhạc"}>
+      <button className={`music-control ${musicOn ? "is-playing" : ""} ${showMusicHint && !musicOn ? "hint-pulse" : ""}`} type="button" onClick={toggleMusic} aria-label={musicOn ? "Tắt nhạc" : "Bật nhạc"}>
         <span className="music-bars" aria-hidden="true"><i /><i /><i /></span>
         <span>{musicOn ? "Music on" : "Music off"}</span>
       </button>
