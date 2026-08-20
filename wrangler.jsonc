@@ -19,7 +19,8 @@
 		{
 			"binding": "DB",
 			"database_name": "save-the-date-nam-v11-db",
-			"database_id": "5280b93c-1d0b-47e3-87cc-3035eedae028"
+			"database_id": "5280b93c-1d0b-47e3-87cc-3035eedae028",
+			"remote": true
 		}
 	]
 }

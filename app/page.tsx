@@ -10,8 +10,8 @@ import {
 } from "react";
 import {
   calculateTimeLeft,
-  MUSIC_VIDEO_ID,
   PHOTO_URLS,
+  type GuestSide,
   type TimeLeft,
 } from "./components/wedding/constants";
 import { useFamilyContext } from "./context/FamilyContext";
@@ -30,42 +30,8 @@ import { MusicControl } from "./components/wedding/MusicControl";
 import { PhotoLightbox } from "./components/wedding/PhotoLightbox";
 import { RsvpModal } from "./components/wedding/RsvpModal";
 
-declare global {
-  interface Window {
-    YT?: {
-      Player: new (
-        elementId: string,
-        options: {
-          width?: string | number;
-          height?: string | number;
-          videoId: string;
-          playerVars?: Record<string, number | string>;
-          events?: {
-            onReady?: (event: { target: YouTubePlayer }) => void;
-            onStateChange?: (event: { data: number }) => void;
-          };
-        },
-      ) => YouTubePlayer;
-    };
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-
-type YouTubePlayer = {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  destroy: () => void;
-};
-
-// Played through the YouTube IFrame Player API (not a plain
-// <iframe src="...autoplay=1">) because mobile browsers only allow media
-// playback to start from a genuine user-activation event — a discrete
-// tap/click/keydown — and only when play() is called synchronously inside
-// that event handler. Passive gestures like scroll/wheel/touchmove do NOT
-// count as activation on iOS Safari or Chrome for Android, which is why the
-// previous "play on first scroll" approach silently failed on mobile.
 export default function Home() {
-  const { guestSide, setGuestSide, guestContext } = useFamilyContext();
+  const { guestSide, setGuestSide, guestContext, musicUrl, isConfigLoading } = useFamilyContext();
   const [musicOn, setMusicOn] = useState(false);
   const [showMusicHint, setShowMusicHint] = useState(true);
   const [showRsvp, setShowRsvp] = useState(false);
@@ -80,9 +46,7 @@ export default function Home() {
     seconds: 0,
   });
   const galleryRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<YouTubePlayer | null>(null);
-  const playerReadyRef = useRef(false);
-  const pendingPlayRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const firstFrame = window.requestAnimationFrame(() =>
@@ -116,108 +80,6 @@ export default function Home() {
       document.body.style.overflow = "";
     };
   }, [guestSide, showRsvp, selectedPhoto]);
-
-  // Create the YouTube player as soon as the page loads (not on first
-  // interaction) so it's already warmed up by the time the visitor triggers
-  // playback. Mobile Safari only allows media playback to begin when
-  // playVideo() runs synchronously inside a user-gesture handler — building
-  // the iframe *after* the gesture introduces a load delay that Safari's
-  // autoplay policy rejects, even though desktop Chrome tolerates it.
-  useEffect(() => {
-    let cancelled = false;
-    const createPlayer = () => {
-      if (cancelled || playerRef.current || !window.YT) return;
-      playerRef.current = new window.YT.Player("music-player", {
-        width: "1",
-        height: "1",
-        videoId: MUSIC_VIDEO_ID,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          loop: 1,
-          playlist: MUSIC_VIDEO_ID,
-          playsinline: 1,
-        },
-        events: {
-          onReady: () => {
-            playerReadyRef.current = true;
-            if (pendingPlayRef.current) {
-              pendingPlayRef.current = false;
-              playerRef.current?.playVideo();
-            }
-          },
-          onStateChange: ({ data }) => {
-            // YouTube state 1 is PLAYING. Do not show the animated icon just
-            // because a gesture was received: autoplay can still be rejected
-            // by the browser or by the YouTube iframe.
-            if (data === 1) setMusicOn(true);
-            if (data === 0 || data === 2 || data === 5) setMusicOn(false);
-          },
-        },
-      });
-    };
-
-    if (window.YT?.Player) {
-      createPlayer();
-    } else {
-      const previousCallback = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        previousCallback?.();
-        createPlayer();
-      };
-      if (
-        !document.querySelector(
-          'script[src="https://www.youtube.com/iframe_api"]',
-        )
-      ) {
-        const tag = document.createElement("script");
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.body.appendChild(tag);
-      }
-    }
-
-    return () => {
-      cancelled = true;
-      playerRef.current?.destroy?.();
-      playerRef.current = null;
-      playerReadyRef.current = false;
-    };
-  }, []);
-
-  // Start music at the beginning of the visitor's first interaction. In
-  // particular, touchstart/pointerdown happen before the browser begins a
-  // scroll, so the YouTube play request still runs inside the user gesture.
-  // A wheel event by itself is not a user activation and cannot reliably
-  // bypass autoplay policy, but a preceding pointer/touch gesture can.
-  useEffect(() => {
-    if (guestSide === null) return;
-    let started = false;
-    const removeListeners = () => {
-      window.removeEventListener("pointerdown", startMusic);
-      window.removeEventListener("touchstart", startMusic);
-      window.removeEventListener("mousedown", startMusic);
-      window.removeEventListener("touchend", startMusic);
-      window.removeEventListener("click", startMusic);
-      window.removeEventListener("keydown", startMusic);
-    };
-    const startMusic = () => {
-      if (started) return;
-      started = true;
-      if (playerReadyRef.current && playerRef.current) {
-        playerRef.current.playVideo();
-      } else {
-        pendingPlayRef.current = true;
-      }
-      removeListeners();
-    };
-    window.addEventListener("pointerdown", startMusic, { passive: true });
-    window.addEventListener("touchstart", startMusic, { passive: true });
-    window.addEventListener("mousedown", startMusic);
-    window.addEventListener("touchend", startMusic, { passive: true });
-    window.addEventListener("click", startMusic);
-    window.addEventListener("keydown", startMusic);
-    return removeListeners;
-  }, [guestSide]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -271,21 +133,26 @@ export default function Home() {
     });
   }, []);
 
-  const toggleMusic = () => {
-    if (musicOn) {
-      setMusicOn(false);
-      pendingPlayRef.current = false;
-      playerRef.current?.pauseVideo();
+  const toggleMusic = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!audio.paused) {
+      audio.pause();
       return;
     }
-    // This runs inside the button's onClick, which is itself a valid
-    // user-activation gesture, so playVideo() here is safe on mobile too.
-    setMusicOn(true);
     setShowMusicHint(false);
-    if (playerReadyRef.current && playerRef.current) {
-      playerRef.current.playVideo();
-    } else {
-      pendingPlayRef.current = true;
+    try {
+      await audio.play();
+    } catch {
+      setMusicOn(false);
+    }
+  };
+
+  const selectGuestSide = (side: GuestSide) => {
+    setGuestSide(side);
+    if (audioRef.current?.paused) {
+      setShowMusicHint(false);
+      void audioRef.current.play().catch(() => setMusicOn(false));
     }
   };
 
@@ -335,16 +202,16 @@ export default function Home() {
   return (
     <main className="invitation-canvas">
       <div className="music-frame" aria-hidden="true">
-        <div id="music-player" />
+        {musicUrl && <audio ref={audioRef} src={musicUrl} loop preload="metadata" onPlay={() => setMusicOn(true)} onPause={() => setMusicOn(false)} />}
       </div>
 
-      {guestSide === null && <GuestSideOverlay onSelect={setGuestSide} />}
+      {guestSide === null && <GuestSideOverlay onSelect={selectGuestSide} disabled={isConfigLoading} />}
 
-      <MusicControl
+      {musicUrl && <MusicControl
         musicOn={musicOn}
         showHint={showMusicHint}
         onToggle={toggleMusic}
-      />
+      />}
 
       <CoverSection />
       <SaveDateSection />

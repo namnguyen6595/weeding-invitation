@@ -20,3 +20,9 @@ export const weddingConfigs = sqliteTable("wedding_configs", {
   eventDate: text("event_date").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const weddingSettings = sqliteTable("wedding_settings", {
+  id: integer("id").primaryKey(),
+  musicUrl: text("music_url").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

@@ -189,6 +189,10 @@ a {
 .guest-side-actions button:hover {
   transform: translateY(-1px);
 }
+.guest-side-actions button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
 .guest-side-actions button:active {
   transform: scale(0.985);
 }
@@ -278,6 +282,7 @@ textarea:focus-visible {
   height: 1px;
   opacity: 0.001;
   pointer-events: none;
+  overflow: hidden;
 }
 .micro-title {
   margin: 0 0 13px;
@@ -290,7 +295,7 @@ textarea:focus-visible {
   color: #8c7868;
 }
 
-/* Compact music fallback; first scroll attempts playback automatically. */
+/* Compact music control; playback starts only after an explicit tap. */
 .music-control {
   position: fixed;
   z-index: 60;
