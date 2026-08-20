@@ -6,5 +6,5 @@
 // `@cloudflare/workers-types` package. Run `npx wrangler types` instead if
 // you want fully-typed bindings generated from wrangler.jsonc.
 declare module "cloudflare:workers" {
-  export const env: any;
+  export const env: { DB?: D1Database };
 }

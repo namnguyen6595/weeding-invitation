@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { FamilyContextProvider } from "./context/FamilyContext";
 
 const siteUrl = "https://save-the-date-nam-mai.dewna.it.com";
 const title = "Save the Date — Nam & Mai";
@@ -37,18 +38,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="vi">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&family=Marcellus&family=Pinyon+Script&family=Tenor+Sans&display=swap"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <FamilyContextProvider>{children}</FamilyContextProvider>
+      </body>
     </html>
   );
 }

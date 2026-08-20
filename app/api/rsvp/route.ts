@@ -43,7 +43,10 @@ export async function POST(request: Request) {
       return Response.json({ error: "Vui lòng chọn phản hồi tham dự." }, { status: 400 });
     }
     const attendance = payload.attendance;
-    const family = isFamily(payload.family) ? payload.family : null;
+    if (!isFamily(payload.family)) {
+      return Response.json({ error: "Vui lòng chọn nhà trai hoặc nhà gái." }, { status: 400 });
+    }
+    const family = payload.family;
 
     const db = getDb();
     const [rsvp] = await db
