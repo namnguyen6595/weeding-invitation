@@ -14,6 +14,7 @@ declare global {
           playerVars?: Record<string, number | string>;
           events?: {
             onReady?: (event: { target: YouTubePlayer }) => void;
+            onStateChange?: (event: { data: number }) => void;
           };
         },
       ) => YouTubePlayer;
@@ -156,6 +157,13 @@ export default function Home() {
               playerRef.current?.playVideo();
             }
           },
+          onStateChange: ({ data }) => {
+            // YouTube state 1 is PLAYING. Do not show the animated icon just
+            // because a gesture was received: autoplay can still be rejected
+            // by the browser or by the YouTube iframe.
+            if (data === 1) setMusicOn(true);
+            if (data === 0 || data === 2 || data === 5) setMusicOn(false);
+          },
         },
       });
     };
@@ -183,13 +191,17 @@ export default function Home() {
     };
   }, []);
 
-  // Start music on the visitor's first genuine user-activation gesture.
-  // touchend/click/keydown carry "user activation" on mobile browsers;
-  // scroll/wheel/touchmove do not, which is why music previously failed to
-  // play on mobile even though the visitor was actively scrolling the page.
+  // Start music at the beginning of the visitor's first interaction. In
+  // particular, touchstart/pointerdown happen before the browser begins a
+  // scroll, so the YouTube play request still runs inside the user gesture.
+  // A wheel event by itself is not a user activation and cannot reliably
+  // bypass autoplay policy, but a preceding pointer/touch gesture can.
   useEffect(() => {
     let started = false;
     const removeListeners = () => {
+      window.removeEventListener("pointerdown", startMusic);
+      window.removeEventListener("touchstart", startMusic);
+      window.removeEventListener("mousedown", startMusic);
       window.removeEventListener("touchend", startMusic);
       window.removeEventListener("click", startMusic);
       window.removeEventListener("keydown", startMusic);
@@ -197,7 +209,6 @@ export default function Home() {
     const startMusic = () => {
       if (started) return;
       started = true;
-      setMusicOn(true);
       if (playerReadyRef.current && playerRef.current) {
         playerRef.current.playVideo();
       } else {
@@ -205,6 +216,9 @@ export default function Home() {
       }
       removeListeners();
     };
+    window.addEventListener("pointerdown", startMusic, { passive: true });
+    window.addEventListener("touchstart", startMusic, { passive: true });
+    window.addEventListener("mousedown", startMusic);
     window.addEventListener("touchend", startMusic, { passive: true });
     window.addEventListener("click", startMusic);
     window.addEventListener("keydown", startMusic);
@@ -253,6 +267,7 @@ export default function Home() {
   const toggleMusic = () => {
     if (musicOn) {
       setMusicOn(false);
+      pendingPlayRef.current = false;
       playerRef.current?.pauseVideo();
       return;
     }
