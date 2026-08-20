@@ -4,7 +4,7 @@ import { useFamilyContext } from "@/app/context/FamilyContext";
 import Image from "next/image";
 
 export const CoverSection = memo(function CoverSection() {
-  const {guestSide} = useFamilyContext()
+  const {guestSide, guestContext} = useFamilyContext()
   const imageSource = useMemo(() => {
     switch (guestSide) {
       case 'groom':
@@ -33,7 +33,7 @@ export const CoverSection = memo(function CoverSection() {
           <i>&amp;</i>
           <span>Ngô Tuyết Mai</span>
         </h1>
-        <div className="cover-date numeric">20 · 09 · 2026</div>
+        <div className="cover-date numeric">{guestContext?.date.display}</div>
       </div>
       <a
         className="cover-scroll"

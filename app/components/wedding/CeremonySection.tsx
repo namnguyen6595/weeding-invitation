@@ -10,11 +10,11 @@ export const CeremonySection = memo(function CeremonySection() {
       <div className="date-editorial scroll-reveal">
         <p className="micro-title">The wedding</p>
         <div className="date-lockup">
-          <span>Tháng 09</span>
-          <strong className="numeric">20</strong>
-          <span>2026</span>
+          <span>{guestContext?.date.month}</span>
+          <strong className="numeric">{guestContext?.date.day}</strong>
+          <span>{guestContext?.date.year}</span>
         </div>
-        <p className="lunar-date">Tức ngày 10 tháng 08 năm Bính Ngọ</p>
+        <p className="lunar-date">{guestContext?.date.lunar}</p>
       </div>
       <div className="venue-block scroll-reveal">
         <p className="micro-title">Địa điểm tổ chức</p>

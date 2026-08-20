@@ -962,6 +962,13 @@ textarea:focus-visible {
   font: 400 48px/0.9 var(--script);
   text-transform: none;
 }
+.countdown-event {
+  margin: -22px auto 30px;
+  color: var(--taupe);
+  font: 400 10px/1.5 var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

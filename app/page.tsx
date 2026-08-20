@@ -86,17 +86,17 @@ export default function Home() {
 
   useEffect(() => {
     const firstFrame = window.requestAnimationFrame(() =>
-      setTimeLeft(calculateTimeLeft()),
+      setTimeLeft(calculateTimeLeft(guestContext?.date.iso)),
     );
     const timer = window.setInterval(
-      () => setTimeLeft(calculateTimeLeft()),
+      () => setTimeLeft(calculateTimeLeft(guestContext?.date.iso)),
       1000,
     );
     return () => {
       window.cancelAnimationFrame(firstFrame);
       window.clearInterval(timer);
     };
-  }, []);
+  }, [guestContext?.date.iso]);
 
   // iOS/Android browsers only allow media playback to start from a discrete
   // tap (touchend that is NOT part of a scroll/pan, or a click) — a visitor
