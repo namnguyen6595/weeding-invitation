@@ -3,6 +3,9 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 const WEDDING_DATE = new Date("2026-09-20T11:00:00+07:00");
+const WEDDING_DATE_END = new Date("2026-09-20T14:00:00+07:00");
+const VENUE_NAME = "Tràng An Palace";
+const VENUE_ADDRESS = "Số 1 Ngụy Như Kon Tum";
 const MUSIC_URL = "https://www.youtube.com/embed/PEM0Vs8jf1w?autoplay=1&controls=0&loop=1&playlist=PEM0Vs8jf1w&playsinline=1";
 const PHOTO_URLS = Array.from(
   { length: 36 },
@@ -20,6 +23,41 @@ const calculateTimeLeft = (): TimeLeft => {
     minutes: Math.floor((remaining / 60_000) % 60),
     seconds: Math.floor((remaining / 1_000) % 60),
   };
+};
+
+const toIcsDate = (date: Date) => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
+};
+
+const escapeIcsText = (value: string) => value.replace(/([,;])/g, "\\$1");
+
+const downloadCalendarInvite = () => {
+  const icsContent = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Nam & Mai Wedding//VI",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:nam-mai-wedding-${WEDDING_DATE.getTime()}@save-the-date-nam-mai.dewna.it.com`,
+    `DTSTAMP:${toIcsDate(new Date())}`,
+    `DTSTART:${toIcsDate(WEDDING_DATE)}`,
+    `DTEND:${toIcsDate(WEDDING_DATE_END)}`,
+    `SUMMARY:${escapeIcsText("Lễ thành hôn Nguyễn Thành Nam & Ngô Tuyết Mai")}`,
+    `DESCRIPTION:${escapeIcsText("Trân trọng kính mời bạn đến chung vui trong lễ thành hôn của Nguyễn Thành Nam và Ngô Tuyết Mai.")}`,
+    `LOCATION:${escapeIcsText(`${VENUE_NAME}, ${VENUE_ADDRESS}`)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "nam-mai-wedding.ics";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
 };
 
 const Botanical = ({ className = "" }: { className?: string }) => (
@@ -173,6 +211,9 @@ export default function Home() {
             {SEPTEMBER_DAYS.map((day, index) => <span className={day === 20 ? "wedding-day" : ""} key={`${day}-${index}`}>{day}</span>)}
           </div>
           <p className="save-date-note">Chủ Nhật · 11 giờ trưa</p>
+          <button type="button" className="add-to-calendar" onClick={downloadCalendarInvite}>
+            Lưu vào lịch <span>↓</span>
+          </button>
         </div>
       </section>
 
@@ -219,8 +260,8 @@ export default function Home() {
         </div>
         <div className="venue-block scroll-reveal">
           <p className="micro-title">Địa điểm tổ chức</p>
-          <h2>Nhà hàng<br />tiệc cưới</h2>
-          <p className="venue-placeholder">Tên nhà hàng và địa chỉ sẽ được cập nhật</p>
+          <h2>{VENUE_NAME}</h2>
+          <p className="venue-placeholder">{VENUE_ADDRESS}</p>
           <a href="https://maps.app.goo.gl/EzCNyYDPnzLNU4fB9" target="_blank" rel="noopener noreferrer">Xem chỉ đường <span>↗</span></a>
         </div>
       </section>
