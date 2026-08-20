@@ -1,6 +1,7 @@
 import { memo } from "react";
 import Image from "next/image";
 import { useFamilyContext } from "@/app/context/FamilyContext";
+import { getCachedMediaUrl } from "./constants";
 
 export const FamiliesSection = memo(function FamiliesSection() {
   const { guestContext } = useFamilyContext();
@@ -16,7 +17,7 @@ export const FamiliesSection = memo(function FamiliesSection() {
       <div className="portrait-stack scroll-reveal">
         <article className="portrait-card">
           {groomImageUrl && <Image
-            src={groomImageUrl}
+            src={getCachedMediaUrl(groomImageUrl)}
             alt="Chú rể Nguyễn Thành Nam"
             width={800}
             height={1000}
@@ -32,7 +33,7 @@ export const FamiliesSection = memo(function FamiliesSection() {
           margin: 0
         }}>
           {brideImageUrl && <Image
-            src={brideImageUrl}
+            src={getCachedMediaUrl(brideImageUrl)}
             alt="Cô dâu Ngô Tuyết Mai"
             width={800}
             height={1000}

@@ -38,16 +38,21 @@ const worker = {
     const url = new URL(request.url);
 
     const isWeddingConfigRequest = url.pathname === "/api/wedding-config" && request.method === "GET";
+    const isMediaRequest = url.pathname === "/api/media" && request.method === "GET";
     const isAdminConfigUpdate = url.pathname === "/api/admin/config" && request.method === "PUT";
 
-    if (isWeddingConfigRequest) {
+    if (isWeddingConfigRequest || isMediaRequest) {
       const edgeCache = (caches as CacheStorage & { default: Cache }).default;
-      const cacheKey = new Request(new URL("/api/wedding-config", url.origin), { method: "GET" });
+      const cacheKey = new Request(url.toString(), { method: "GET" });
       const cachedResponse = await edgeCache.match(cacheKey);
       if (cachedResponse) return cachedResponse;
 
       const response = await handler.fetch(request, env, ctx);
-      if (response.ok && response.headers.get("Content-Type")?.includes("application/json")) {
+      const contentType = response.headers.get("Content-Type") ?? "";
+      const cacheableContent = isWeddingConfigRequest
+        ? contentType.includes("application/json")
+        : contentType.startsWith("image/") || contentType.startsWith("audio/");
+      if (response.ok && cacheableContent) {
         ctx.waitUntil(edgeCache.put(cacheKey, response.clone()));
       }
       return response;

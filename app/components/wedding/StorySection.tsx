@@ -1,6 +1,7 @@
 import { memo } from "react";
 import Image from "next/image";
 import { Botanical } from "./Botanical";
+import { getCachedMediaUrl } from "./constants";
 import { useFamilyContext } from "@/app/context/FamilyContext";
 
 export const StorySection = memo(function StorySection() {
@@ -18,7 +19,7 @@ export const StorySection = memo(function StorySection() {
         </h2>
         <div className="story-photo">
           {imageUrl && <Image
-            src={imageUrl}
+            src={getCachedMediaUrl(imageUrl)}
             alt="Khoảnh khắc của Nam và Mai"
             width={800}
             height={1000}

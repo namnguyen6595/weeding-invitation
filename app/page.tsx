@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   calculateTimeLeft,
+  getCachedMediaUrl,
   PHOTO_URLS,
   type GuestSide,
   type TimeLeft,
@@ -138,7 +139,7 @@ export default function Home() {
     const audio = new Audio();
     audio.loop = true;
     audio.preload = "metadata";
-    audio.src = musicUrl;
+    audio.src = getCachedMediaUrl(musicUrl);
     audio.onplay = () => setMusicOn(true);
     audio.onpause = () => setMusicOn(false);
     audioRef.current = audio;

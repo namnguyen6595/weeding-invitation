@@ -1,6 +1,7 @@
 import { memo } from "react";
 import Image from "next/image";
 import { useFamilyContext } from "@/app/context/FamilyContext";
+import { getCachedMediaUrl } from "./constants";
 
 export const TimelineSection = memo(function TimelineSection() {
   const { guestContext } = useFamilyContext();
@@ -9,7 +10,7 @@ export const TimelineSection = memo(function TimelineSection() {
     <section className="timeline-section">
       {imageUrl && <Image
         className="timeline-photo"
-        src={imageUrl}
+        src={getCachedMediaUrl(imageUrl)}
         alt="Ảnh cưới Nam và Mai"
         width={920}
         height={1040}

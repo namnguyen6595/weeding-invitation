@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { useFamilyContext } from "@/app/context/FamilyContext";
 import Image from "next/image";
+import { getCachedMediaUrl } from "./constants";
 
 export const CoverSection = memo(function CoverSection() {
   const { guestContext } = useFamilyContext();
@@ -8,7 +9,7 @@ export const CoverSection = memo(function CoverSection() {
   return (
     <section className="cover-section">
       {imageSource && <Image
-        src={imageSource}
+        src={getCachedMediaUrl(imageSource)}
         alt="Nam và Mai trong bộ ảnh cưới"
         fill
         priority

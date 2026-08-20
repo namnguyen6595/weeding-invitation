@@ -1,10 +1,18 @@
 export const DEFAULT_EVENT_DATE = "2026-09-20T11:00:00+07:00";
 export const MUSIC_URL =
   "https://pub-f56b79df70fa43399d2d0de06b99b7bf.r2.dev/Kai%20%C4%90inh%20x%20ERIK%20%E2%80%98Va%CC%81y%20Cu%CC%9Bo%CC%9B%CC%81i%E2%80%99%20Lyrics%20Video%20From%20the%20Wedding%20of%20Ms.%20Vien%20Vibi%20and%20Mr.Linh.mp3";
+export const R2_PUBLIC_ORIGIN = "https://pub-f56b79df70fa43399d2d0de06b99b7bf.r2.dev";
+
+export function getCachedMediaUrl(source: string) {
+  return source.startsWith(R2_PUBLIC_ORIGIN)
+    ? `/api/media?src=${encodeURIComponent(source)}`
+    : source;
+}
+
 export const PHOTO_URLS = Array.from(
   { length: 36 },
   (_, index) =>
-    `https://pub-f56b79df70fa43399d2d0de06b99b7bf.r2.dev/anh-cuoi/photo-${String(index + 1).padStart(3, "0")}.webp`,
+    `${R2_PUBLIC_ORIGIN}/anh-cuoi/photo-${String(index + 1).padStart(3, "0")}.webp`,
 );
 export const SEPTEMBER_DAYS = [
   ...Array(2).fill(null),

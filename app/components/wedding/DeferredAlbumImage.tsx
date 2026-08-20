@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { getCachedMediaUrl } from "./constants";
 
 type DeferredAlbumImageProps = {
   src: string;
@@ -33,5 +34,5 @@ export function DeferredAlbumImage({ src, alt, galleryRef }: DeferredAlbumImageP
 
   if (!shouldLoad) return <div ref={placeholderRef} className="album-image-placeholder" aria-hidden="true" />;
 
-  return <Image src={src} alt={alt} width={900} height={1200} loading="eager" unoptimized />;
+  return <Image src={getCachedMediaUrl(src)} alt={alt} width={900} height={1200} loading="eager" unoptimized />;
 }
