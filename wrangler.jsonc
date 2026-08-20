@@ -1,7 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"account_id": "04947b996d85ee530922a8af9707229b",
-	"name": "save-the-date-nam-v11",
+	"name": "weeding-invitation",
 	"compatibility_date": "2026-05-22",
 	"compatibility_flags": [
 		"nodejs_compat"
