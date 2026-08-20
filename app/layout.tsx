@@ -1,11 +1,40 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const siteUrl = "https://save-the-date-nam-mai.dewna.it.com";
+const title = "Save the Date — Nam & Mai";
+const description =
+  "Trân trọng kính mời bạn đến chung vui trong lễ thành hôn của Nguyễn Thành Nam và Ngô Tuyết Mai — Chủ Nhật, 20.09.2026.";
+const ogImagePath = "/og-image.jpg";
+
 export const metadata: Metadata = {
-  title: "Save the Date — Nam & Mai",
-  description: "Trân trọng kính mời bạn đến chung vui trong lễ thành hôn của Nguyễn Thành Nam và Ngô Tuyết Mai.",
+  title,
+  description,
+  metadataBase: new URL(siteUrl),
   other: { "codex-preview": "development" },
   icons: { icon: "/photo-006.webp", shortcut: "/photo-006.webp" },
+  openGraph: {
+    title,
+    description,
+    url: siteUrl,
+    siteName: title,
+    locale: "vi_VN",
+    type: "website",
+    images: [
+      {
+        url: ogImagePath,
+        width: 1200,
+        height: 630,
+        alt: "Nguyễn Thành Nam & Ngô Tuyết Mai — 20.09.2026",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [ogImagePath],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
