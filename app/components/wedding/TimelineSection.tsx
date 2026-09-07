@@ -22,7 +22,7 @@ export const TimelineSection = memo(function TimelineSection() {
         <h2>Timeline</h2>
         <div className="timeline-list">
           <div>
-            <time className="numeric">08:30</time>
+            <time className="numeric">07:30</time>
             <span>Đón dâu tại Tư gia nhà gái</span>
           </div>
           <div>
